@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vispons API Documentation</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f0f4ff;
+            --accent-color: #ff6b4a;
+            --text-color: #333;
+            --light-text: #666;
+            --border-color: #ddd;
+            --code-bg: #f8f9fa;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            line-height: 1.6;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #6a4aff);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 30px;
+        }
+        
+        nav {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            align-self: start;
+            position: sticky;
+            top: 20px;
+        }
+        
+        nav h2 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        nav ul {
+            list-style: none;
+        }
+        
+        nav li {
+            margin-bottom: 10px;
+        }
+        
+        nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: block;
+            padding: 5px 0;
+        }
+        
+        nav a:hover {
+            color: var(--accent-color);
+        }
+        
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+        
+        section h2 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .endpoint {
+            margin-bottom: 25px;
+        }
+        
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .method {
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .endpoint-url {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .param-table th, .param-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .param-table th {
+            background-color: var(--secondary-color);
+            font-weight: 600;
+        }
+        
+        .param-table tr:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .required {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .code-block {
+            background: var(--code-bg);
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .note-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #856404;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            color: var(--light-text);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            nav {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vispons API Documentation</h1>
+            <p>Документация по интеграции вашего Telegram бота с сервисом Vispons</p>
+        </header>
+        
+        <div class="content">
+            <nav>
+                <h2>Содержание</h2>
+                <ul>
+                    <li><a href="#intro">Введение</a></li>
+                    <li><a href="#auth">Аутентификация</a></li>
+                    <li><a href="#request-op">Метод request_op</a></li>
+                    <li><a href="#parameters">Параметры запроса</a></li>
+                    <li><a href="#response">Обработка ответа</a></li>
+                    <li><a href="#callback">Callback обработка</a></li>
+                    <li><a href="#examples">Примеры кода</a></li>
+                </ul>
+            </nav>
+            
+            <main>
+                <section id="intro">
+                    <h2>Введение</h2>
+                    <p>Vispons - это сервис для управления подписками и заданиями в Telegram ботах. API позволяет интегрировать функциональность проверки подписок и управления заданиями в вашего бота.</p>
+                    <p>Для использования API вам необходимо зарегистрировать своего бота в панели управления Vispons и получить токен доступа.</p>
+                </section>
+                
+                <section id="auth">
+                    <h2>Аутентификация</h2>
+                    <p>Все запросы к API Vispons должны содержать токен аутентификации в заголовках:</p>
+                    <div class="code-block">
+                        Authorization: Bearer YOUR_ACCESS_TOKEN
+                    </div>
+                    <p>Замените YOUR_ACCESS_TOKEN на ваш действительный токен, полученный при регистрации бота.</p>
+                </section>
+                
+                <section id="request-op">
+                    <h2>Метод request_op</h2>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method">POST</span>
+                            <span class="endpoint-url">/api/request_op</span>
+                        </div>
+                        <p>Основной метод для проверки статуса подписки пользователя и получения списка ссылок для подписки.</p>
+                    </div>
+                </section>
+                
+                <section id="parameters">
+                    <h2>Параметры запроса</h2>
+                    <p>Метод request_op принимает следующие параметры:</p>
+                    
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Параметр</th>
+                                <th>Тип</th>
+                                <th>Обязательный</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>user_id</td>
+                                <td>Integer</td>
+                                <td class="required">Да</td>
+                                <td>Уникальный идентификатор пользователя Telegram</td>
+                            </tr>
+                            <tr>
+                                <td>chat_id</td>
+                                <td>Integer</td>
+                                <td class="required">Да</td>
+                                <td>Идентификатор чата с пользователем</td>
+                            </tr>
+                            <tr>
+                                <td>action</td>
+                                <td>String</td>
+                                <td>Нет</td>
+                                <td>
+                                    Тип действия при запросе:<br>
+                                    "subscribe" (по умолчанию): Подобранный список ссылок закрепляется за пользователем на время, указанное в настройках бота (параметр "Время сброса привязки"). При повторном запросе в течение этого времени будет проверяться подписка на тот же список.<br>
+                                    "newtask": Подобранный список ссылок не закрепляется. При каждом запросе может быть выдан новый список. Актуально для разделов "Задания".
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>first_name</td>
+                                <td>String</td>
+                                <td>Нет*</td>
+                                <td>Имя пользователя. Обязательно если бот добавлен в сервис без токена.</td>
+                            </tr>
+                            <tr>
+                                <td>language_code</td>
+                                <td>String</td>
+                                <td>Нет*</td>
+                                <td>Код языка пользователя. Обязательно если бот добавлен в сервис без токена.</td>
+                            </tr>
+                            <tr>
+                                <td>is_premium</td>
+                                <td>Boolean</td>
+                                <td>Нет*</td>
+                                <td>Статус Premium подписки пользователя. Обязательно если бот добавлен в сервис без токена.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="note">
+                        <div class="note-title">Примечание:</div>
+                        <p>Если вы добавили свой бот в сервис БЕЗ токена, не забудьте передать дополнительные параметры: first_name, language_code, is_premium.</p>
+                        <p>Получить их можно следующим образом:</p>
+                        <div class="code-block">
+                            message.from_user.first_name<br>
+                            message.from_user.language_code<br>
+                            message.from_user.is_premium
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="response">
+                    <h2>Обработка ответа</h2>
+                    <p>Метод возвращает объект с двумя полями: status и code.</p>
+                    
+                    <table class="param-table">
+                        <thead>
+                            <tr>
+                                <th>Статус</th>
+                                <th>Код</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>ok</td>
+                                <td>200</td>
+                                <td>Пользователь подписан на все необходимые каналы</td>
+                            </tr>
+                            <tr>
+                                <td>ok</td>
+                                <td>201</td>
+                                <td>Пользователь только что подписался на каналы</td>
+                            </tr>
+                            <tr>
+                                <td>wait</td>
+                                <td>202</td>
+                                <td>Ожидание подписки пользователя на каналы</td>
+                            </tr>
+                            <tr>
+                                <td>error</td>
+                                <td>400</td>
+                                <td>Неверный запрос или отсутствуют обязательные параметры</td>
+                            </tr>
+                            <tr>
+                                <td>error</td>
+                                <td>401</td>
+                                <td>Неверный или отсутствующий токен аутентификации</td>
+                            </tr>
+                            <tr>
+                                <td>error</td>
+                                <td>500</td>
+                                <td>Внутренняя ошибка сервера</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+                
+                <section id="callback">
+                    <h2>Callback обработка</h2>
+                    <p>Для обработки callback данных от кнопок подписки необходимо реализовать в вашем боте обработчик callback запросов.</p>
+                    
+                    <div class="code-block">
+                        @dp.callback_query(F.data.startwith("vispons"))<br>
+                        async def vispons_callback_query(call: types.CallbackQuery):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;user_id = call.from_user.id<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;chat_id = call.message.chat.id<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;if call.data == "vispons-op":<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status, code = await request_op(user_id, chat_id)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if status == 'ok' and code == 200: #Если статус ok и code 200 (совокупность параметров означает, что пользователь подписан)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Выдать вознаграждение, если еще не было выдано<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(chat_id, 'Спасибо за подписку👍')<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elif status == 'ok':<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Пропустить пользователя дальше в своем боте<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(chat_id, 'Спасибо за подписку👍')<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;elif call.data.startswith("vispons_gender_"):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gender = call.data.split("_")[2]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;status, code = await request_op(user_id, chat_id, gender)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if status == 'ok' and code == 200: #Если статус ok и code 200 (совокупность параметров означает, что пользователь подписан)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Выдать вознаграждение, если еще не было выдано<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(chat_id, 'Спасибо за подписку👍')<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elif status == 'ok':<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;#Пропустить пользователя дальше в своем боте<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(chat_id, 'Спасибо за подписку👍')<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return
+                    </div>
+                    
+                    <div class="note">
+                        <div class="note-title">Примечание:</div>
+                        <p>Если вы добавили свой бот в сервис БЕЗ токена, не забудьте передать дополнительные параметры в функцию request_op: first_name, language_code, is_premium.</p>
+                    </div>
+                </section>
+                
+                <section id="examples">
+                    <h2>Примеры кода</h2>
+                    <p>Пример вызова и обработки ответа в вашем боте (AIOGRAM/AsyncTelebot):</p>
+                    
+                    <div class="code-block">
+                        status, code = await request_op(message.from_user.id, message.chat.id)<br>
+                        if status == 'ok' and code == 200: #Если статус ok и code 200 (совокупность параметров означает, что пользователь подписан)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;#Выдать вознаграждение, если еще не было выдано<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(message.chat.id, 'Спасибо за подписку👍')<br>
+                        elif status == 'ok':<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;#Пропустить пользователя дальше в своем боте<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;await bot.send_message(message.chat.id, 'Спасибо за подписку👍')<br>
+                        else:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return
+                    </div>
+                    
+                    <div class="note">
+                        <div class="note-title">Важно:</div>
+                        <p>Если вы получаете массив links от сервиса, НЕ ЗАБЫВАЙТЕ вывести его в свой блок обязательной подписки!</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+        
+        <footer>
+            <p>© 2023 Vispons API. Все права защищены.</p>
+            <p>Документация обновлена: 23 августа 2025 г.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Плавная прокрутка к якорям
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Подсветка текущего раздела в навигации
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            
+            let currentSection = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if (pageYOffset >= sectionTop - 50) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
