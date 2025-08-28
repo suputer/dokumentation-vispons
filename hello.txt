@@ -1,0 +1,5 @@
+Hello World!
+Файл создан: 2025-08-28 23:58:47.197949
+Репо: suputer/dokumentation-vispons
+GitHub Pages: https://suputer.github.io/dokumentation-vispons
+Данные доступны из любого места!
