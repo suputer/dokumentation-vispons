@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0088cc, #3d85c6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .header {
+            background-color: #0088cc;
+            color: white;
+            padding: 25px 20px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0088cc;
+            border-radius: 50%;
+            margin: 25px auto;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            display: none;
+            margin-top: 25px;
+        }
+        
+        .success {
+            color: #2ecc71;
+        }
+        
+        .error {
+            color: #e74c3c;
+        }
+        
+        .icon {
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .vpn-warning {
+            background-color: #ffecb3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7d6608;
+            display: none;
+        }
+        
+        .footer {
+            padding: 18px;
+            background-color: #f5f5f5;
+            font-size: 13px;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+        
+        .test-info {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #e8f4fd;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #0a6c9f;
+            text-align: left;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Проверка безопасности</h1>
+            <p>Пожалуйста, подождите, идет проверка</p>
+        </div>
+        
+        <div class="content">
+            <div class="loader" id="loader"></div>
+            
+            <div class="result" id="result">
+                <div class="icon" id="icon"></div>
+                <h2 class="message" id="message"></h2>
+                
+                <div class="vpn-warning" id="vpnWarning">
+                    <p>Если вы используете VPN, рекомендуем отключить его и попробовать снова.</p>
+                </div>
+                
+                <div class="test-info" id="testInfo">
+                    <p><strong>Тестовый режим:</strong> UID не передан в URL</p>
+                    <p>Для реальной проверки добавьте параметр ?uid=ВАШ_UID к URL</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Данная проверка необходима для обеспечения безопасности вашего аккаунта
+        </div>
+    </div>
+
+    <script>
+        // Получаем UID из параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        let uid = urlParams.get('uid');
+        const isTestMode = !uid;
+        
+        // Если UID не передан, используем тестовый ID
+        if (isTestMode) {
+            uid = 'test-uid-' + Math.floor(Math.random() * 1000);
+        }
+        
+        // Элементы DOM
+        const loader = document.getElementById('loader');
+        const result = document.getElementById('result');
+        const icon = document.getElementById('icon');
+        const message = document.getElementById('message');
+        const vpnWarning = document.getElementById('vpnWarning');
+        const testInfo = document.getElementById('testInfo');
+        
+        // Токен бота и ID канала (замените на свои)
+        const BOT_TOKEN = '7555725844:AAGt4gpvmSEGLurhiNf4zuSEh_8qdkSLAmM';
+        const CHANNEL_ID = '-1002829641970';
+        
+        // Разрешенные страны
+        const ALLOWED_COUNTRIES = ['ua', 'ru', 'by', 'kz'];
+        
+        // Функция для получения данных из localStorage
+        function getStoredData() {
+            const storedData = localStorage.getItem('telegram_verification_lx');
+            return storedData ? JSON.parse(storedData) : {};
+        }
+        
+        // Функция для сохранения данных в localStorage
+        function storeData(uid, ip, country) {
+            const storedData = getStoredData();
+            
+            // Сохраняем данные по UID
+            if (!storedData[uid]) {
+                storedData[uid] = [];
+            }
+            
+            // Добавляем новую запись, если такого IP еще нет
+            const hasIp = storedData[uid].some(entry => entry.ip === ip);
+            if (!hasIp) {
+                storedData[uid].push({
+                    ip: ip,
+                    country: country,
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Ограничиваем историю до 5 последних записей на UID
+                if (storedData[uid].length > 5) {
+                    storedData[uid] = storedData[uid].slice(-5);
+                }
+            }
+            
+            // Сохраняем обновленные данные
+            localStorage.setItem('telegram_verification_lx', JSON.stringify(storedData));
+            
+            return storedData;
+        }
+        
+        // Функция для проверки IP в истории
+        function checkIpUsedWithOtherUid(currentUid, ip) {
+            const storedData = getStoredData();
+            
+            // Проверяем все UID кроме текущего
+            for (const storedUid in storedData) {
+                if (storedUid !== currentUid) {
+                    // Проверяем, есть ли такой IP в истории другого UID
+                    const ipFound = storedData[storedUid].some(entry => entry.ip === ip);
+                    if (ipFound) {
+                        return true; // IP использовался с другим UID
+                    }
+                }
+            }
+            
+            return false; // IP не использовался с другими UID
+        }
+        
+        // Функция для получения IP и страны
+        async function getIPAndCountry() {
+            try {
+                // Получаем IP
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+                
+                // Получаем страну через ipinfo.io (бесплатно до 50k запросов/мес)
+                const countryResponse = await fetch(`https://ipinfo.io/${userIP}/country`);
+                const countryCode = await countryResponse.text();
+                
+                // Если страна не определена, считаем её Россией
+                let country = countryCode.trim().toLowerCase();
+                if (!country || country === 'undefined' || country === 'unknown') {
+                    country = 'ru'; // Россия по умолчанию
+                }
+                
+                return {
+                    ip: userIP,
+                    country: country
+                };
+            } catch (error) {
+                console.error('Ошибка определения местоположения:', error);
+                // Фолбэк - при ошибке считаем Россией
+                try {
+                    const fallback = await fetch('https://ipapi.co/json/');
+                    const data = await fallback.json();
+                    return {
+                        ip: data.ip || 'не удалось определить',
+                        country: data.country_code ? data.country_code.toLowerCase() : 'ru' // Россия по умолчанию
+                    };
+                } catch {
+                    return {
+                        ip: 'не удалось определить',
+                        country: 'ru' // Россия по умолчанию
+                    };
+                }
+            }
+        }
+        
+        // Функция для отправки данных в Telegram
+        async function sendToTelegram(uid, ip, country) {
+            // Не отправляем в Telegram в тестовом режиме
+            if (isTestMode) {
+                console.log('Тестовый режим: данные не отправляются в Telegram');
+                return;
+            }
+            
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHANNEL_ID,
+                        text: `Проверка безопасности:\nUID: ${uid}\nIP: ${ip}\nСтрана: ${country}`,
+                        disable_notification: true
+                    })
+                });
+            } catch (error) {
+                console.error('Ошибка при отправке в Telegram:', error);
+            }
+        }
+        
+        // Функция для отображения результата
+        function showResult(isSuccess, showVpnWarning = false) {
+            loader.style.display = 'none';
+            result.style.display = 'block';
+            
+            if (isSuccess) {
+                icon.innerHTML = '✅';
+                icon.className = 'icon success';
+                message.textContent = 'Проверка пройдена!';
+                message.className = 'success';
+            } else {
+                icon.innerHTML = '❌';
+                icon.className = 'icon error';
+                message.textContent = 'Доступ заблокирован';
+                message.className = 'error';
+                
+                // Показываем предупреждение о VPN, если необходимо
+                if (showVpnWarning) {
+                    vpnWarning.style.display = 'block';
+                }
+            }
+            
+            // Показываем тестовую информацию, если UID не был передан
+            if (isTestMode) {
+                testInfo.style.display = 'block';
+            }
+        }
+        
+        // Основная функция
+        async function verifyUser() {
+            try {
+                const { ip, country } = await getIPAndCountry();
+                
+                // Сохраняем данные локально
+                storeData(uid, ip, country);
+                
+                // Проверяем, использовался ли этот IP с другим UID
+                const ipUsedWithOtherUid = checkIpUsedWithOtherUid(uid, ip);
+                
+                // Отправляем данные в Telegram (только если не в тестовом режиме)
+                await sendToTelegram(uid, ip, country);
+                
+                // Проверяем страну и историю IP
+                // Разрешаем доступ если:
+                // 1. Страна разрешенная И
+                // 2. IP не использовался с другими UID (или уже использовался с этим UID)
+                if (ALLOWED_COUNTRIES.includes(country) && !ipUsedWithOtherUid) {
+                    showResult(true);
+                } else {
+                    showResult(false, true);
+                }
+            } catch (error) {
+                console.error('Ошибка при проверке:', error);
+                showResult(false, true);
+            }
+        }
+        
+        // Запускаем проверку при загрузке страницы
+        window.addEventListener('load', verifyUser);
+    </script>
+</body>
+</html>
